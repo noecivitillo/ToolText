@@ -49,6 +49,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -75,11 +76,7 @@ import com.tool.utils.Selection;
 import java.util.List;
 
 
-
-
-
-
-public class CustomEditText extends android.support.v7.widget.AppCompatEditText {
+public class CustomEditText extends EditText {
 
     // Log tag
     private static final String TAG = "CustomEditText";
