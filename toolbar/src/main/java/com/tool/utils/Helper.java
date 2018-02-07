@@ -1,5 +1,4 @@
 package com.tool.utils;
-
 /*
  * This file is part of Android RTEditor and is Copyright by Emanuel Moecklin (C) 2015-2018
  *
@@ -14,6 +13,8 @@ package com.tool.utils;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Modifications Copyright (c) Noelia Civitillo 2018
 */
 
 import android.content.Context;
@@ -55,15 +56,11 @@ public abstract class Helper {
             return sDensity;
         }
     }
-
     /**
      * Convert absolute pixels to scale dependent pixels.
      * This scales the size by scale dependent screen density (accessibility setting) and
      * the global display setting for message composition fields
      */
-    public static void closeQuietly(Closeable closeable) {
-        IOUtils.closeQuietly(closeable);
-    }
     public static int convertPxToSp(int pxSize) {
         return Math.round((float) pxSize * getDisplayDensity4Fonts());
     }
@@ -78,7 +75,7 @@ public abstract class Helper {
     }
 
     private static DisplayMetrics getDisplayMetrics() {
-        Display display = ((WindowManager) App.getContext().getApplicationContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
         return metrics;
@@ -94,7 +91,7 @@ public abstract class Helper {
     }
 
     private static float getFontScale() {
-        Configuration config = App.getContext().getApplicationContext().getResources().getConfiguration();
+        Configuration config = App.getContext().getResources().getConfiguration();
         return config.fontScale;
     }
 
@@ -105,41 +102,6 @@ public abstract class Helper {
         }
         return sLeadingMarging;
     }
-
-    /**
-     * This method encodes the query part of an url
-     * @param url an url (e.g. http://www.1gravity.com?query=üö)
-     * @return The url with an encoded query, e.g. http://www.1gravity.com?query%3D%C3%BC%C3%B6
-     */
-    public static String encodeQuery(String url) {
-        Uri uri = Uri.parse(url);
-
-        try {
-            String query = uri.getQuery();
-            String encodedQuery = query != null ? URLEncoder.encode(query, "UTF-8") : null;
-            URI tmp = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment());
-            return tmp + (encodedQuery != null && encodedQuery.length() > 0 ? "?" + encodedQuery : "");
-        }
-        catch (UnsupportedEncodingException ignore) {}
-        catch (URISyntaxException ignore) {}
-
-        return uri.toString();
-    }
-
-    /**
-     * This method decodes an url with encoded query string
-     * @param url an url with encoded query string (e.g. http://www.1gravity.com?query%3D%C3%BC%C3%B6)
-     * @return The decoded url, e.g. http://www.1gravity.com?query=üö
-     */
-    public static String decodeQuery(String url) {
-        try {
-            return URLDecoder.decode(url, "UTF-8");
-        }
-        catch (UnsupportedEncodingException ignore) {}
-
-        return url;
-    }
-
     /**
      * This method determines if the direction of a substring is right-to-left.
      * If the string is empty that determination is based on the default system language
