@@ -3,10 +3,12 @@ package com.tool;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.widget.ImageButton;
+
 import com.example.test.toolbarRichText.R;
 
 
-public class ToolbarImageButton extends android.support.v7.widget.AppCompatImageButton {
+public class ToolbarImageButton extends ImageButton {
     private static final int[] CHECKED_STATE_SET = {R.attr.state_checked};
     private boolean mChecked;
 
