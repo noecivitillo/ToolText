@@ -19,21 +19,13 @@ package com.tool.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.tool.App;
-import com.tool.utils.io.IOUtils;
+import com.tool.MyToolText;
 
 
-import java.io.Closeable;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.text.Bidi;
 import java.util.Locale;
 
@@ -75,7 +67,7 @@ public abstract class Helper {
     }
 
     private static DisplayMetrics getDisplayMetrics() {
-        Display display = ((WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        Display display = ((WindowManager) MyToolText.getApplicationContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
         return metrics;
@@ -91,7 +83,7 @@ public abstract class Helper {
     }
 
     private static float getFontScale() {
-        Configuration config = App.getContext().getResources().getConfiguration();
+        Configuration config = MyToolText.getApplicationContext().getResources().getConfiguration();
         return config.fontScale;
     }
 
