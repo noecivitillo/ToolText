@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="com.github.SUPERCILEX.FirebaseUI-Android:firebase-ui-auth-f8634227b9">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/firebase-ui-auth-f8634227b9.aar/8bc08b97a978a9612f97df0e7aaa0898/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/firebase-ui-auth-f8634227b9.aar/8bc08b97a978a9612f97df0e7aaa0898/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.SUPERCILEX.FirebaseUI-Android/firebase-ui-auth/f8634227b9/ecf6538591cc85c31ae4da6ef500825abe3173c8/firebase-ui-auth-f8634227b9-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

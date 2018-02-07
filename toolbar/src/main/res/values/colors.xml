@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="transparent_gray_50">#00FAFAFA</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="gray">#EEEEEE</color>
+    <color name="gray2">#E0E0E0</color>
+    <color name="gray3">#BDBDBD</color>
+    <color name="blue_400">#5C6BC0</color>
+    <color name="blue_200">#9FA8DA</color>
+    <color name="teal_500">#009688</color>
+    <color name="teal_200">#80CBC4</color>
+    <color name="light_blue_500">#03A9F4</color>
+
+    <!--font colors-->
+    <color name="black">#000000</color>
+    <color name="red_500">#FF5722</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="blue_500">#3F51B5</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="blue_grey_200">#B0BEC5</color>
+    <!--background colors-->
+    <color name="gray_50">#fafafa</color>
+    <color name="deep_orange_200">#FFAB91</color>
+    <color name="green_400">#66bb6a</color>
+    <color name="purple_200">#ce93d8</color>
+    <color name="teal_100">#B2DFDB</color>
+
+    <color name="deep_orange_800">#D84315</color>
+    <color name="deep_orange_500">#FF5722</color>
+    <color name="deep_orange_400">#FF7043</color>
+    <color name="deep_orange_300">#FF8A65</color>
+    <color name="gray_700">#616161</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="deep_orange_a200">#ff6e40</color>
+    <color name="indigo_500">#3f51b5</color>
+    <color name="light_blue_a400">#00b0ff</color>
+    <color name="cyan_600">#00acc1</color>
+    <color name="red_a400">#ff1744</color>
+    <color name="teal_400">#26a69a</color>
+    <color name="cyan_a700">#00b8d4</color>
+    <color name="blue_a100">#82b1ff</color>
+    <color name="teal_a700">#00bfa5</color>
+    <color name="pink_a200">#ff4081</color>
+    <color name="blue_grey_500">#607D8B</color>
+    <color name="cyan_300">#4DD0E1</color>
+</resources>

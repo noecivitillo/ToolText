@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/gradient">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/blue_grey_500"/>
+            <corners android:radius="2dp"/>
+        </shape>
+    </item>
+    <item
+        android:id="@+id/drawable"
+        android:drawable="@drawable/ic_format_color_text_wh_blue_24dp"
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp"/>
+</layer-list>

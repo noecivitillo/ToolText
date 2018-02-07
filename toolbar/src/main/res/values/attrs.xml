@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Theme">
+    <attr name="ToolbarButton" format="reference"/>
+        <attr name="icToolbarBold" format="reference"/>
+        <attr name="icToolbarItalic" format="reference"/>
+        <attr name="icToolbarUnderlined" format="reference"/>
+        <attr name="icToolbarBulleted" format="reference"/>
+        <attr name="icToolbarNumbered" format="reference"/>
+        <attr name="icToolbarFillColor" format="reference"/>
+        <attr name="icToolbarFontColor" format="reference"/>
+        <attr name="icToolbarSize" format="reference"/>
+        <attr name="icBgColorGreen" format="reference"/>
+        <attr name="icBgColorBlueLight" format="reference"/>
+        <attr name="icBgColorOrange" format="reference"/>
+        <attr name="icBgColorPurple" format="reference"/>
+        <attr name="icBgColorWhite" format="reference"/>
+        <attr name="icButtonCollapse" format="reference"/>
+    </declare-styleable>
+    <declare-styleable name="ToolbarImageButton">
+        <attr name="checked" format="boolean"/>
+        <attr name="state_checked" format="boolean"/>
+    </declare-styleable>
+</resources>

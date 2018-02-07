@@ -1,0 +1,34 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/blue_grey_500</item>
+        <!-- add selector here-->
+    </style>
+    <style name="ToolbarImageButton" parent="@style/Widget.AppCompat.ImageButton">
+        <item name="android:layout_width">26dp</item>
+        <item name="android:layout_height">26dp</item>
+        <item name="android:layout_marginRight">15dp</item>
+        <item name="android:background">@color/gray_50</item>
+    </style>
+    <style name="ToolbarBaseTheme" parent="AppTheme">
+        <!-- add selector here-->
+        <item name="ToolbarButton">@style/ToolbarImageButton</item>
+        <item name="icToolbarBold">@drawable/selector_ic_toolbar_bold</item>
+        <item name="icToolbarItalic">@drawable/selector_ic_toolbar_italic</item>
+        <item name="icToolbarUnderlined">@drawable/selector_ic_toolbar_underlined</item>
+        <item name="icToolbarBulleted">@drawable/selector_ic_toolbar_bulleted</item>
+        <item name="icToolbarNumbered">@drawable/selector_ic_toolbar_numbered</item>
+        <item name="icToolbarFillColor">@drawable/selector_ic_toolbar_fill_color</item>
+        <item name="icToolbarFontColor">@drawable/selector_ic_toolbar_font_color</item>
+        <item name="icToolbarSize">@drawable/selector_ic_toolbar_size</item>
+        <item name="icBgColorGreen">@drawable/selector_bgcolor_green</item>
+        <item name="icBgColorBlueLight">@drawable/selector_bgcolor_bluelight</item>
+        <item name="icBgColorOrange">@drawable/selector_bgcolor_orange</item>
+        <item name="icBgColorPurple">@drawable/selector_bgcolor_purple</item>
+        <item name="icBgColorWhite">@drawable/selector_bgcolor_white</item>
+        <item name="icButtonCollapse">@drawable/ic_arrow_down_blue_grey</item>
+    </style>
+</resources>
