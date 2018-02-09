@@ -43,13 +43,11 @@ import android.text.style.ParagraphStyle;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -75,12 +73,10 @@ import com.tool.utils.Selection;
 
 import java.util.List;
 
-
-public class CustomEditText extends EditText {
+public class CustomEditText extends android.support.v7.widget.AppCompatEditText{
 
     // Log tag
     private static final String TAG = "CustomEditText";
-
     // Style constants
     private static final int STYLE_BOLD = 0;
     private static final int STYLE_ITALIC = 1;
@@ -92,10 +88,17 @@ public class CustomEditText extends EditText {
     ToolbarImageButton boldBtn;
     ToolbarImageButton italicBtn;
     ToolbarImageButton underlinedBtn;
-    ToolbarImageButton bulletedBtn;
-    ToolbarImageButton numberedBtn;
+    ToolbarImageButton bulletBtn;
+    ToolbarImageButton numberBtn;
     SeekBar seekBarSizes;
-    RadioGroup groupColors;
+    ToolbarImageButton fillColorButton;
+    ToolbarImageButton fontColorButton;
+    ToolbarImageButton sizeButton;
+    LinearLayout toolbarButtons;
+    LinearLayout sizesLayout;
+    ImageButton collapseToolbar;
+    RadioGroup fillColorsGroup;
+    RadioGroup fontColorsGroup;
 
     boolean expanded=false;
 
@@ -111,11 +114,10 @@ public class CustomEditText extends EditText {
     boolean resetNumber =false;
     boolean hasPreviousLineNumber;
 
-    // Color
+
     private int currentColor = -1;
     private int currentBGColor = -1;
     private int currentSize= Math.round(getTextSize());
-    private EventBack eventBack;
     private int margin = Helper.getLeadingMarging();
 
 
@@ -133,30 +135,6 @@ public class CustomEditText extends EditText {
     int lastFillColorChecked;
 
 
-    // interface
-    public interface EventBack {
-        public void close();
-
-        public void show();
-    }
-
-    public EventBack getEventBack() {
-        return eventBack;
-    }
-
-    public void setEventBack(EventBack eventBack) {
-        this.eventBack = eventBack;
-    }
-
-    @Override
-    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            eventBack.close();
-        } else {
-            eventBack.show();
-        }
-        return super.dispatchKeyEvent(event);
-    }
     public CustomEditText(Context context) {
         super(context);
         initialize();
@@ -177,19 +155,17 @@ public class CustomEditText extends EditText {
                 return null;
             }
         };
-
-        // Add TextWatcher that reacts to text changes and applies the selected
-        // styles
-        /**
+        /*
+         * Improvement to add bullet and number after press enter...need to be tested
+         *
+         */
         setOnKeyListener(new OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (bulletedBtn.isChecked()) {
+                if (bulletBtn.isChecked() || numberBtn.isChecked()) {
                     if (event.getAction() != KeyEvent.ACTION_DOWN) {
                         if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                            Log.i(TAG, "enter button pressed");
-                            append("");
-                            //insert(" ");
+                            append(" ");
                             return true;
                         }
                     }
@@ -197,7 +173,7 @@ public class CustomEditText extends EditText {
                 return false;
             }
         });
-         */
+        // Add TextWatcher that reacts to text changes and applies the selected
         this.addTextChangedListener(new DWTextWatcher());
     }
     /**
@@ -232,10 +208,8 @@ public class CustomEditText extends EditText {
                     bulletButtonClick(selectionStart, selectionEnd);
                     break;
                 case PARAGRAPH_NUMBER:
-                    //this work OK -- see afterTextChanged
-                    //Effects.NUMBER.applyToSelection(this,true);
                     numberButtonClick(selectionStart, selectionEnd);
-                //TODO add PARAGRAPH_NUMBER
+                    break;
             }
         }
     }
@@ -252,33 +226,6 @@ public class CustomEditText extends EditText {
         if (selectionEnd > selectionStart) {
             seekBarChanged(size, selectionStart, selectionEnd);
         }
-    }
-    public void setSizeSeekBar(SeekBar seekBar){
-        //Log.i(TAG, "---TEXT SIZE IN PX is "+ currentSize);
-        seekBarSizes = seekBar;
-        seekBar.incrementProgressBy(50);
-        seekBar.setMax(190);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(progress==0){
-                    progress=50;
-                }
-                changeSize(progress);
-                currentSize=progress;
-                if(currentSize==0){
-                    currentSize=50;
-                }
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                //Log.i(TAG, "---START --The progress is "+ seekBar.getProgress());
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-
-        });
     }
     private void seekBarChanged(int size, int selectionStart, int selectionEnd) {
         boolean exists = false;
@@ -300,8 +247,7 @@ public class CustomEditText extends EditText {
             str.removeSpan(styleSpan);
             //exists = true;
         }
-        //TODO see this
-        /**
+        /*
          if (underlineStart > -1) {
          str.setSpan(new AbsoluteSizeSpan(size), underlineStart, selectionStart,
          Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -328,20 +274,16 @@ public class CustomEditText extends EditText {
         for (NumberSpan aQuoteSpan : quoteSpan) {
             str.removeSpan(aQuoteSpan);
             exists = true;
-            Log.i(TAG, "Removing number in numberButtonClick");
         }
         for (BulletSpan bulletSpa : bulletSpan) {
             str.removeSpan(bulletSpa);
-           // exists = true;
-           // Log.i(TAG, "Removing number in numberButtonClick");
+            // exists = true;
+            // Log.i(TAG, "Removing number in numberButtonClick");
         }
         // Else we set UNDERLINE style on it
         if (!exists) {
             if (getSelectionStart() == 0 && getSelectionEnd() == getText().length()) {
-                Log.i(TAG, "Selection end is " + getSelectionEnd() + "  Txt length is " + getText().length());
-
                 int linecount = getLineCount();
-                Log.i(TAG, "Amount of lines " + linecount);
                 nr = 1;
 
                 if (linecount >= 0) {
@@ -349,15 +291,12 @@ public class CustomEditText extends EditText {
                         int startPos = getLayout().getLineStart(i);
                         int endPos = getLayout().getLineEnd(i);
 
-
                         str.setSpan(new NumberSpan(nr++, margin, true, true, true), startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        Log.i(TAG, " Adding number in position start " + startPos + " Position end " + endPos);
                     }
                 }
             } else {
                 nr=1;
                 str.setSpan(new NumberSpan(nr++, margin,true, true, true), selectionStart, selectionEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                Log.i(TAG, "Adding number in numberButtonClick");
             }
         }
         this.setSelection(selectionStart, selectionEnd);
@@ -372,7 +311,6 @@ public class CustomEditText extends EditText {
         for (BulletSpan aQuoteSpan : quoteSpan) {
             str.removeSpan(aQuoteSpan);
             exists = true;
-            Log.i(TAG, "Removing bullet in bulletButtonClick");
         }
         for (NumberSpan n : quotSpan) {
             str.removeSpan(n);
@@ -380,23 +318,17 @@ public class CustomEditText extends EditText {
         }
         if (!exists) {
             if (getSelectionStart() == 0 && getSelectionEnd() == getText().length()) {
-                Log.i(TAG, "Selection end is " + getSelectionEnd() + "  Txt length is " + getText().length());
-
                 int linecount = getLineCount();
-                Log.i(TAG, "Amount of lines " + linecount);
-
                 if (linecount >= 0) {
                     for (int i = 0; i < linecount; i++) {
                         int startPos = getLayout().getLineStart(i);
                         int endPos = getLayout().getLineEnd(i);
 
                         str.setSpan(new BulletSpan(margin, true, true, true), startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        Log.i(TAG, " Adding bullet in position start " + startPos + " Position end " + endPos);
                     }
                 }
             } else {
                 str.setSpan(new BulletSpan(margin, true, true, true), selectionStart, selectionEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                Log.i(TAG, "Adding bullet in bulletButtonClick");
             }
         }
         this.setSelection(selectionStart, selectionEnd);
@@ -416,7 +348,6 @@ public class CustomEditText extends EditText {
                 underlineEnd = str.getSpanEnd(styleSpan);
             }
             str.removeSpan(styleSpan);
-            Log.i(TAG, "REMOVING UNDERLINE");
             exists = true;
         }
         if (underlineStart > -1) {
@@ -463,7 +394,6 @@ public class CustomEditText extends EditText {
                 if (str.getSpanEnd(styleSpan) > selectionEnd) {
                     styleEnd = str.getSpanEnd(styleSpan);
                 }
-                Log.i(TAG, "---REMOVING---");
                 str.removeSpan(styleSpan);
                 exists = true;
             }
@@ -471,20 +401,15 @@ public class CustomEditText extends EditText {
         if (styleStart > -1) {
             str.setSpan(style, styleStart, selectionStart,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            Log.i(TAG, "---ADDING STYLESPAN---in handleStyleSpannable");
         }
         if (styleEnd > -1) {
             str.setSpan(style, selectionEnd, styleEnd,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            Log.i(TAG, "---ADDING STYLESPAN---");
         }
-
         // Else we set BOLD style on it
         if (!exists) {
             str.setSpan(style, selectionStart, selectionEnd,
                     Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            Log.i(TAG, "---ADDING ITALIC---");
-
         } else {
             boldBtn.setChecked(false);
 
@@ -508,7 +433,6 @@ public class CustomEditText extends EditText {
                 if (str.getSpanEnd(styleSpan) > selectionEnd) {
                     styleEnd = str.getSpanEnd(styleSpan);
                 }
-                Log.i(TAG, "---REMOVING---");
                 str.removeSpan(styleSpan);
                 exists = true;
             }
@@ -516,19 +440,15 @@ public class CustomEditText extends EditText {
         if (styleStart > -1) {
             str.setSpan(style, styleStart, selectionStart,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            Log.i(TAG, "---ADDING STYLESPAN---in handleStyleSpannable");
         }
         if (styleEnd > -1) {
             str.setSpan(style, selectionEnd, styleEnd,
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            Log.i(TAG, "---ADDING STYLESPAN---");
         }
-
         // Else we set BOLD style on it
         if (!exists) {
             str.setSpan(style, selectionStart, selectionEnd,
                     Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            Log.i(TAG, "---ADDING ITALIC---");
 
         } else {
             italicBtn.setChecked(false);
@@ -536,9 +456,50 @@ public class CustomEditText extends EditText {
         }
         this.setSelection(selectionStart, selectionEnd);
     }
+    private void handleCheckedFillColors(final ToolbarImageButton fillColorButton){
+        if(lastFillColorChecked == R.id.white_btn){
+            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
+                    R.drawable.ic_format_color_fill_gray50 : R.drawable.ic_fill_color_selected);
+        }else if(lastFillColorChecked == R.id.orange_btn){
+            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
+                    R.drawable.ic_format_color_fill_orange : R.drawable.ic_fill_color_selected_orange);
+        }else if(lastFillColorChecked == R.id.green_btn){
+            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
+                    R.drawable.ic_format_color_fill_green : R.drawable.ic_fill_color_selected_green);
+        }else if(lastFillColorChecked == R.id.light_blue_btn) {
+            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
+                    R.drawable.ic_format_color_fill_bluelight : R.drawable.ic_fill_color_selected_blue);
+        }else if(lastFillColorChecked== R.id.purple_btn){
+            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
+                    R.drawable.ic_format_color_fill_purple : R.drawable.ic_fill_color_selected_purple);
+        }
+    }
+    private void handleCheckedFontColors(final ToolbarImageButton fontColorButton){
+        if(lastFontColorChecked == R.id.black_btn){
+            fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
+                    R.drawable.ic_format_color_text_bl_black_24dp :
+                    R.drawable.ic_font_color_selected_black);
+        }else if(lastFontColorChecked == R.id.red_btn){
+            fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
+                    R.drawable.ic_format_color_text_red_24dp :
+                    R.drawable.ic_font_color_selected_red);
+        }else if(lastFontColorChecked == R.id.green_font_btn){
+            fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
+                    R.drawable.ic_format_color_text_green_24dp :
+                    R.drawable.ic_font_color_selected_green);
+        }else if(lastFontColorChecked == R.id.blue_btn) {
+            fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
+                    R.drawable.ic_format_color_text_blue_24dp :
+                    R.drawable.ic_font_color_selected_blue);
+        }else if(lastFontColorChecked== R.id.grey_btn){
+            fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
+                    R.drawable.ic_format_color_text:
+                    R.drawable.ic_font_color_selected_grey);
+        }
+
+    }
     @Override
     public void onSelectionChanged(int selStart, int selEnd) {
-        //TODO review this...
         boolean boldExists = false;
         boolean italicsExists = false;
         boolean underlinedExists = false;
@@ -554,22 +515,17 @@ public class CustomEditText extends EditText {
             for (ParagraphStyle anAppliedParagraphStyle : appliedParagraphStyle) {
                 if (anAppliedParagraphStyle instanceof BulletSpan) {
                     bulletExists = true;
-                    Log.i(TAG, "---FOUNDED BULLET WITH THE CURSOR AROUND---");
                 }
                 if (anAppliedParagraphStyle instanceof NumberSpan) {
                     numberExists = true;
-                    Log.i(TAG, "---FOUNDED NUMBER WITH THE CURSOR AROUND---");
                 }
 
             }
             for (CharacterStyle styleSpan : styleSpans) {
                 if ((styleSpan) instanceof BoldSpan) {
-                    Log.i(TAG, "---FOUNDED BOLD---with cursor around");
                     boldExists = true;
                 } else if (styleSpan instanceof ItalicSpan) {
-                    Log.i(TAG, "---FOUNDED ITALIC---with cursor around");
                     italicsExists = true;
-                    //TODO fix
                 } else if (styleSpan instanceof ItalicSpan && styleSpan instanceof BoldSpan) {
                     italicsExists = true;
                     boldExists = true;
@@ -587,13 +543,11 @@ public class CustomEditText extends EditText {
                 if (styleSpan instanceof BoldSpan) {
                     if (this.getText().getSpanStart(styleSpan) <= selStart
                             && this.getText().getSpanEnd(styleSpan) >= selEnd) {
-                        Log.i(TAG, "---FOUNDED BOLD---");
                         boldExists = true;
                     }
                 } else if ((styleSpan) instanceof ItalicSpan) {
                     if (this.getText().getSpanStart(styleSpan) <= selStart
                             && this.getText().getSpanEnd(styleSpan) >= selEnd) {
-                        Log.i(TAG, "---FOUNDED ITALIC---");
                         italicsExists = true;
                     }
                 } else if ((styleSpan) instanceof BoldSpan && (styleSpan) instanceof ItalicSpan) {
@@ -610,7 +564,6 @@ public class CustomEditText extends EditText {
                 } else if (styleSpan instanceof AbsoluteSizeSpan) {
                     if (this.getText().getSpanStart(styleSpan) <= selStart
                             && this.getText().getSpanEnd(styleSpan) >= selEnd) {
-                        //TODO---
                     }
                 }
             }
@@ -620,47 +573,43 @@ public class CustomEditText extends EditText {
             for (ParagraphStyle anAppliedParagraphStyle : appliedParagraphStyle) {
                 if (anAppliedParagraphStyle instanceof BulletSpan) {
                     bulletExists = true;
-                    Log.i(TAG, "---FOUNDED BULLET----");
                 }
                 if (anAppliedParagraphStyle instanceof NumberSpan) {
                     numberExists = true;
-                    Log.i(TAG, "---FOUNDED NUMBER----");
                 }
             }
         }
         // Display the format settings
-        //TODO
-         if (boldBtn != null) {
-         if (boldExists)
-         boldBtn.setChecked(true);
-         else
-         boldBtn.setChecked(false);
-         }
-         if (italicBtn != null) {
-         if (italicsExists)
-         italicBtn.setChecked(true);
-         else
-         italicBtn.setChecked(false);
-         }
-         if (underlinedBtn != null) {
-         if (underlinedExists)
-         underlinedBtn.setChecked(true);
-         else
-         underlinedBtn.setChecked(false);
-         }
-         if (bulletedBtn != null) {
+        if (boldBtn != null) {
+            if (boldExists)
+                boldBtn.setChecked(true);
+            else
+                boldBtn.setChecked(false);
+        }
+        if (italicBtn != null) {
+            if (italicsExists)
+                italicBtn.setChecked(true);
+            else
+                italicBtn.setChecked(false);
+        }
+        if (underlinedBtn != null) {
+            if (underlinedExists)
+                underlinedBtn.setChecked(true);
+            else
+                underlinedBtn.setChecked(false);
+        }
+        if (bulletBtn != null) {
             if (bulletExists)
-                bulletedBtn.setChecked(true);
-           // else
-                //bulletedBtn.setChecked(false);
+                bulletBtn.setChecked(true);
+            // else
+            //bulletBtn.setChecked(false);
             //Log.i(TAG, " BULLET TOGGLE UNCHECKED!!!");
         }
-        if (numberedBtn != null) {
+        if (numberBtn != null) {
             if (numberExists)
-                numberedBtn.setChecked(true);
-             //else
-            //TODO see
-               // numberedBtn.setChecked(false);
+                numberBtn.setChecked(true);
+            //else??
+            // numberBtn.setChecked(false);
             //Log.i(TAG, " BULLET TOGGLE UNCHECKED!!!");
         }
 
@@ -687,15 +636,14 @@ public class CustomEditText extends EditText {
     // Get and set styled HTML text
     public String getTextHTML() {
         Spanned fromInput = this.getText();
-        //TODO SEE THIS
         return HtmlHandler.toHtml(fromInput, RTFormat.HTML);
-        /**SpanTagRoster tagRoster = new SpanTagRoster();
+        /*
+         SpanTagRoster tagRoster = new SpanTagRoster();
          Spanned fromInput = this.getText();
          return new SpannedXhtmlGenerator(tagRoster).toXhtml(fromInput);
          */
-        //return Html.toHtml(this.getText());
-    }
 
+    }
     public void setTextHTML(String text) {
         this.setText(Html.fromHtml(text, imageGetter, null));
     }
@@ -704,7 +652,39 @@ public class CustomEditText extends EditText {
     public void setImageGetter(Html.ImageGetter imageGetter) {
         this.imageGetter = imageGetter;
     }
+    public void setAllStyles(LinearLayout layout){
+        boldBtn= layout.findViewById(R.id.toolbar_bold);
+        boldBtn= layout.findViewById(R.id.toolbar_bold);
+        italicBtn= layout.findViewById(R.id.toolbar_italic);
+        underlinedBtn= layout.findViewById(R.id.toolbar_underlined);
+        bulletBtn = layout.findViewById(R.id.toolbar_bulleted);
+        numberBtn = layout.findViewById(R.id.toolbar_numbered);
+        seekBarSizes= layout.findViewById(R.id.seek_sizes);
+        fillColorButton= layout.findViewById(R.id.toolbar_fill_color);
+        fontColorButton= layout.findViewById(R.id.toolbar_font_color);
+        sizeButton= layout.findViewById(R.id.toolbar_size);
+        toolbarButtons= layout.findViewById(R.id.toolbar_buttons);
+        sizesLayout = layout.findViewById(R.id.sizes);
+        collapseToolbar = layout.findViewById(R.id.collapse_toolbar);
+        fontColorsGroup= layout.findViewById(R.id.font_colors);
+        fillColorsGroup=layout.findViewById(R.id.colors);
 
+        ToolbarParams params=
+                new ToolbarParams.Builder(fontColorButton, fillColorButton, sizeButton, fillColorsGroup,
+                        fontColorsGroup, sizesLayout, toolbarButtons, collapseToolbar).build();
+
+        setSizeSeekBar(seekBarSizes);
+        setBoldButton(boldBtn);
+        setItalicButton(italicBtn);
+        setUnderlineButton(underlinedBtn);
+        setBulletButton(bulletBtn);
+        setNumberButton(numberBtn);
+        setBGColorGroup(params.getFillGroup(), fillColorButton);
+        setFontColorGroup(params.getFontGroup(), fontColorButton);
+        handleClickInGroupButtons(params);
+        collapseToolbar(params);
+
+    }
     // Style toggle button setters
     public void setBoldButton(ToolbarImageButton button) {
         boldBtn = button;
@@ -746,45 +726,42 @@ public class CustomEditText extends EditText {
             }
         });
     }
-
     public void setBulletButton(ToolbarImageButton button) {
-        bulletedBtn = button;
-
-        bulletedBtn.setOnClickListener(new Button.OnClickListener() {
+        bulletBtn = button;
+        bulletBtn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
 
                 int id = v.getId();
                 if (id == R.id.toolbar_bulleted) {
-                    bulletedBtn.setChecked(!bulletedBtn.isChecked());
+                    bulletBtn.setChecked(!bulletBtn.isChecked());
                 }
                 toggleStyle(PARAGRAPH_BULLET);
 
                 Editable editable = getEditableText();
 
-                if(numberedBtn.isChecked()){
+                if(numberBtn.isChecked()){
                     NumberSpan[] appliedNumbers = editable.getSpans(0, length(), NumberSpan.class);
                     removeNumber(editable);
-                    numberedBtn.setChecked(false);
+                    numberBtn.setChecked(false);
                 }
                 BulletSpan bulletSpan = new BulletSpan(margin, false, false, false);
 
-                if (bulletedBtn.isChecked()) {
-                if (getText().toString().trim().isEmpty()) {
-                    //TODO test this
-                    append("");
-                } else {
-                    int start = getSelectionStart();
-                    int end = getSelectionEnd();
+                if (bulletBtn.isChecked()) {
+                    if (getText().toString().trim().isEmpty()) {
+                        append("");
+                    } else {
+                        int start = getSelectionStart();
+                        int end = getSelectionEnd();
 
-                    BulletSpan[] appliedStyles = editable.getSpans(start, end, BulletSpan.class);
-                    if (appliedStyles.length == 0) {
-                        int lineCount = getLineCount();
-                        if (lineCount >= 1) {
-                            for (int i = 0; i < lineCount; i++) {
-                                int startPos = getLayout().getLineStart(i);
-                                int endPos = getLayout().getLineEnd(i);
+                        BulletSpan[] appliedStyles = editable.getSpans(start, end, BulletSpan.class);
+                        if (appliedStyles.length == 0) {
+                            int lineCount = getLineCount();
+                            if (lineCount >= 1) {
+                                for (int i = 0; i < lineCount; i++) {
+                                    int startPos = getLayout().getLineStart(i);
+                                    int endPos = getLayout().getLineEnd(i);
 
-                                String theLine = getText().toString().substring(startPos, endPos);
+                                    String theLine = getText().toString().substring(startPos, endPos);
 /**
  Log.i(TAG, "Start line --- " + startPos + " end line is -- " + endPos + " line length is " + theLine.length());
  Log.i(TAG, "Cursor position  --- " + getSelectionEnd());
@@ -793,34 +770,35 @@ public class CustomEditText extends EditText {
  Log.i(TAG, "Selection start  --- " + getSelectionStart());
 
  */
-                                int lineTxt = getSelectionEnd() + 1 - theLine.length();
-                                if (lineTxt == startPos) {
-                                    Log.i(TAG, "---CURSOR IS AT THE END---ADDING BULLET");
-                                    editable.setSpan(bulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    hasBullet=true;
-                                }
-                                if (getLineCount() - 1 == i) {
-                                    lineTxt = getSelectionEnd() - theLine.length();
+                                    int lineTxt = getSelectionEnd() + 1 - theLine.length();
                                     if (lineTxt == startPos) {
-                                        Log.i(TAG, "---CURSOR IS AT THE END of LAST LINE---ADDING BULLET");
                                         editable.setSpan(bulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         hasBullet=true;
                                     }
-                                    if (getSelectionStart() == startPos + 1) {
-                                        Log.i(TAG, "---CURSOR IS AT THE START of LAST LINE---ADDING BULLET");
+                                    if (getLineCount() - 1 == i) {
+                                        lineTxt = getSelectionEnd() - theLine.length();
+                                        if (lineTxt == startPos) {
+                                            editable.setSpan(bulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                            hasBullet=true;
+                                        }
+                                        if (getSelectionStart() == startPos + 1) {
+                                            editable.setSpan(bulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                            hasBullet=true;
+                                        }
+                                    }
+                                    if (getSelectionStart() == startPos) {
                                         editable.setSpan(bulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                      /*
+                                       * Improvement to add bullet and number after press enter...need to be tested
+                                       *
+                                       */
+                                        append(" ");
                                         hasBullet=true;
                                     }
-                                }
-                                if (getSelectionStart() == startPos) {
-                                    Log.i(TAG, "---CURSOR IS AT THE START---ADDING BULLET");
-                                    editable.setSpan(bulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    hasBullet=true;
                                 }
                             }
                         }
                     }
-                }
                 } else {
                     if (getText().toString().trim().isEmpty()) {
                         setText("");
@@ -834,111 +812,101 @@ public class CustomEditText extends EditText {
 
     }
     public void setNumberButton(ToolbarImageButton button) {
-        numberedBtn = button;
+        numberBtn = button;
 
-        numberedBtn.setOnClickListener(new Button.OnClickListener() {
+        numberBtn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
 
                 int id = v.getId();
                 if (id == R.id.toolbar_numbered) {
-                    numberedBtn.setChecked(!numberedBtn.isChecked());
+                    numberBtn.setChecked(!numberBtn.isChecked());
 
                 }
                 toggleStyle(PARAGRAPH_NUMBER);
 
                 Editable editable = getEditableText();
-                if(bulletedBtn.isChecked()){
+                if(bulletBtn.isChecked()){
                     BulletSpan[] appliedNumbers = editable.getSpans(0, length(), BulletSpan.class);
-                    Log.i(TAG, "---BULLETED BUTTON IS CHECKED---"+ appliedNumbers.length);
                     removeBullet(editable);
-                    bulletedBtn.setChecked(false);
+                    bulletBtn.setChecked(false);
                 }
 
-                if (numberedBtn.isChecked()) {
+                if (numberBtn.isChecked()) {
+                    numberButtonIsChecked=true;
+                    int start = getSelectionStart();
+                    int end = getSelectionEnd();
+                    NumberSpan[] appliedStyles = editable.getSpans(start, end, NumberSpan.class);
+                    NumberSpan numberSpan;
+                    nr=0;
+                    if (appliedStyles.length == 0) {
+                        int lineCount = getLineCount();
+                        if (lineCount >= 1) {
+                            for (int i = 0; i < lineCount; i++) {
+                                int startPos = getLayout().getLineStart(i);
+                                int endPos = getLayout().getLineEnd(i);
+                                String theLine = getText().toString().substring(startPos, endPos);
+                                nr++;
+                                if(i>0) {
+                                    int previouStartPos = getLayout().getLineStart(i - 1);
+                                    int previousEndPos = getLayout().getLineEnd(i - 1);
 
-                        numberButtonIsChecked=true;
-
-                        Log.i(TAG, "---NUMBER BUTTON IS CHECKED--- NUMBER IS"+ nr);
-                        int start = getSelectionStart();
-                        int end = getSelectionEnd();
-                        NumberSpan[] appliedStyles = editable.getSpans(start, end, NumberSpan.class);
-                        NumberSpan numberSpan;
-                        nr=0;
-                        if (appliedStyles.length == 0) {
-                            int lineCount = getLineCount();
-                            if (lineCount >= 1) {
-                                for (int i = 0; i < lineCount; i++) {
-                                    int startPos = getLayout().getLineStart(i);
-                                    int endPos = getLayout().getLineEnd(i);
-                                    String theLine = getText().toString().substring(startPos, endPos);
+                                    String previousLine = getText().toString().substring(previouStartPos, previousEndPos);
+                                    NumberSpan[] previousLineHasNumber = editable.getSpans(previouStartPos, previousEndPos, NumberSpan.class);
+                                    if (previousLineHasNumber.length > 0) {
+                                        hasPreviousLineNumber=true;
+                                    } else {
+                                        hasPreviousLineNumber=false;
+                                    }
+                                }
+                                if(resetNumber && !hasPreviousLineNumber){
+                                    nr=0;
                                     nr++;
-                                    if(i>0) {
-                                        int previouStartPos = getLayout().getLineStart(i - 1);
-                                        int previousEndPos = getLayout().getLineEnd(i - 1);
-
-                                        String previousLine = getText().toString().substring(previouStartPos, previousEndPos);
-                                        NumberSpan[] previousLineHasNumber = editable.getSpans(previouStartPos, previousEndPos, NumberSpan.class);
-                                        if (previousLineHasNumber.length > 0) {
-                                            Log.i(TAG, "---PREVIOUS LINE HAS NUMBER is " + previousLine);
-                                            hasPreviousLineNumber=true;
-                                        } else {
-                                            Log.i(TAG, "---PREVIOUS LINE HAS NOT NUMBER is " + previousLine);
-                                            hasPreviousLineNumber=false;
-                                        }
+                                    numberSpan= new NumberSpan(nr, margin, true, true, true);
+                                    number = nr;
+                                }else {
+                                    if(removedNumber>0) {
+                                        numberSpan= new NumberSpan(removedNumber, margin, true, true, true);
+                                        removedNumber=0;
+                                    }else{
+                                        numberSpan= new NumberSpan(nr, margin, true, true, true);
+                                        number=nr;
                                     }
-                                    if(resetNumber && !hasPreviousLineNumber){
-                                        nr=0;
-                                        nr++;
-                                            numberSpan= new NumberSpan(nr, margin, true, true, true);
-                                            number = nr;
-                                        Log.i(TAG, "--NUMBER in setNumberButton--" + number);
-                                    }else {
-                                        if(removedNumber>0) {
-                                            numberSpan= new NumberSpan(removedNumber, margin, true, true, true);
-                                            removedNumber=0;
-                                        }else{
-                                            numberSpan= new NumberSpan(nr, margin, true, true, true);
-                                            number=nr;
-                                            Log.i(TAG, "--NUMBER in setNumberButton--" + number);
-                                        }
-                                    }
-                                    int lineTxt = getSelectionEnd() + 1 - theLine.length();
+                                }
+                                int lineTxt = getSelectionEnd() + 1 - theLine.length();
+                                if (lineTxt == startPos) {
+                                    editable.setSpan(numberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    hasNumber = true;
+                                }
+                                if (getLineCount() - 1 == i) {
+                                    lineTxt = getSelectionEnd() - theLine.length();
                                     if (lineTxt == startPos) {
-                                        Log.i(TAG, "---CURSOR IS AT THE END---ADDING NUMBER");
-                                        Log.i(TAG, "---LINE---" +i + "NUMBER "+nr);
                                         editable.setSpan(numberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                        hasNumber = true;
+                                            /*
+                                            test
+                                             */
+                                        addedNumber1withSetNumberButton=true;
+                                        hasNumber=true;
                                     }
-                                    if (getLineCount() - 1 == i) {
-                                        lineTxt = getSelectionEnd() - theLine.length();
-                                        if (lineTxt == startPos) {
-                                            Log.i(TAG, "---CURSOR IS AT THE END of LAST LINE---ADDING NUMBER");
-                                            Log.i(TAG, "---LINE---" +i + "NUMBER "+nr);
-
-                                            editable.setSpan(numberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                            //TODO SEE THIS
-                                            addedNumber1withSetNumberButton=true;
-                                            hasNumber=true;
-                                        }
-                                        if (getSelectionStart() == startPos + 1) {
-                                            Log.i(TAG, "---CURSOR IS AT THE START of LAST LINE---ADDING NUMBER");
-                                            Log.i(TAG, "---LINE---" +i + "NUMBER "+nr);
-                                            editable.setSpan(numberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                            hasNumber=true;
-
-                                        }
-                                    }
-                                    if (getSelectionStart() == startPos) {
-                                        Log.i(TAG, "---CURSOR IS AT THE START---ADDING NUMBER");
-                                        Log.i(TAG, "---LINE---" +i + "NUMBER "+nr);
+                                    if (getSelectionStart() == startPos + 1) {
                                         editable.setSpan(numberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                        cursorAtStart=true;
                                         hasNumber=true;
 
                                     }
                                 }
+                                if (getSelectionStart() == startPos) {
+                                    editable.setSpan(numberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        /*
+                                        * Improvement to add bullet and number after press enter...need to be tested
+                                        *
+                                        */
+                                    append(" ");
+                                    cursorAtStart=true;
+                                    hasNumber=true;
+
+                                }
                             }
                         }
+                    }
                 }else{
                     numberButtonIsChecked=false;
                     //hasNumber=false;
@@ -947,38 +915,89 @@ public class CustomEditText extends EditText {
             }
 
         });
+    }
+    public void setSizeSeekBar(SeekBar seekBar){
+        seekBarSizes = seekBar;
+        seekBar.incrementProgressBy(50);
+        seekBar.setMax(190);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(progress==0){
+                    progress=50;
+                }
+                changeSize(progress);
+                currentSize=progress;
+                if(currentSize==0){
+                    currentSize=50;
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
 
+        });
     }
     public int setBGColorGroup(final RadioGroup radioGroup, final ToolbarImageButton fillColorButton){
-        groupColors=radioGroup;
-        groupColors.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        fillColorsGroup=radioGroup;
+        fillColorsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 lastFillColorChecked = checkedId;
                 if (checkedId == R.id.white_btn) {
-                    Log.i(TAG, "---CHECKED WHITE---");
                     setBGColor(ContextCompat.getColor(getContext(), R.color.transparent_gray_50), getSelectionStart(), getSelectionEnd());
                     fillColorButton.setBackgroundResource(R.drawable.ic_fill_color_selected);
                 } else if (checkedId == R.id.orange_btn) {
-                    Log.i(TAG, "---CHECKED ORANGE---");
                     setBGColor(ContextCompat.getColor(getContext(), R.color.deep_orange_200), getSelectionStart(), getSelectionEnd());
                     fillColorButton.setBackgroundResource(R.drawable.ic_fill_color_selected_orange);
                 } else if (checkedId == R.id.green_btn) {
-                    Log.i(TAG, "---CHECKED GREEN---");
                     setBGColor(ContextCompat.getColor(getContext(), R.color.green_400), getSelectionStart(), getSelectionEnd());
                     fillColorButton.setBackgroundResource(R.drawable.ic_fill_color_selected_green);
                 } else if (checkedId == R.id.purple_btn) {
-                    Log.i(TAG, "---CHECKED PURPLE---");
                     setBGColor(ContextCompat.getColor(getContext(), R.color.purple_200), getSelectionStart(), getSelectionEnd());
                     fillColorButton.setBackgroundResource(R.drawable.ic_fill_color_selected_purple);
-                }else if(checkedId ==  R.id.light_blue_btn)
-                Log.i(TAG, "---CHECKED BLUE LIGHT---");
-                setBGColor(ContextCompat.getColor(getContext(), R.color.teal_100), getSelectionStart(), getSelectionEnd());
-                fillColorButton.setBackgroundResource(R.drawable.ic_fill_color_selected_blue);
+                }else if(checkedId ==  R.id.light_blue_btn) {
+                    setBGColor(ContextCompat.getColor(getContext(), R.color.teal_100), getSelectionStart(), getSelectionEnd());
+                    fillColorButton.setBackgroundResource(R.drawable.ic_fill_color_selected_blue);
                 }
+            }
         });
         return lastFillColorChecked;
-        }
+    }
+    public int setFontColorGroup(final RadioGroup radioGroup, final ToolbarImageButton fontColorButton){
+        fontColorsGroup=radioGroup;
+        fontColorsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                lastFontColorChecked=checkedId;
+                if(checkedId == R.id.black_btn){
+                    setFontColor(Color.BLACK, getSelectionStart(), getSelectionEnd());
+                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_black);
+                }else if(checkedId == R.id.red_btn){
+                    setFontColor(ContextCompat.getColor(getContext(), R.color.red_500), getSelectionStart(), getSelectionEnd());
+                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_red);
+                    lastFontColorChecked=checkedId;
+                }else if(checkedId == R.id.green_font_btn){
+                    setFontColor(ContextCompat.getColor(getContext(), R.color.green_500), getSelectionStart(), getSelectionEnd());
+                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_green);
+                    lastFontColorChecked=checkedId;
+                }else if(checkedId == R.id.blue_btn){
+                    setFontColor(ContextCompat.getColor(getContext(), R.color.blue_500), getSelectionStart(), getSelectionEnd());
+                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_blue);
+                    lastFontColorChecked=checkedId;
+                }else if(checkedId == R.id.grey_btn){
+                    setFontColor(ContextCompat.getColor(getContext(), R.color.gray_500), getSelectionStart(), getSelectionEnd());
+                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_grey);
+                    lastFontColorChecked=checkedId;
+                }
+            }
+        });
+        return lastFontColorChecked;
+    }
     public void collapseToolbar(ToolbarParams params){
         final ImageButton collapseToolbar= params.getCollapseToolbar();
         final LinearLayout toolbarButtons= params.getToolbarButtons();
@@ -1053,20 +1072,20 @@ public class CustomEditText extends EditText {
                         if (fillColorsGroup != null) {
                             fillColorsGroup.setVisibility(fillColorBtn.isChecked() ? View.VISIBLE : View.GONE);
                         }
-                        }
-                        if (fontColorsGroup != null || sizesLayout != null) {
-                            fontColorsGroup.setVisibility(GONE);
-                            sizesLayout.setVisibility(View.GONE);
-                            if(fontColorBtn!= null) {
-                                if(fontColorBtn.isChecked()) {
-                                    handleCheckedFontColors(fontColorBtn);
-                                    fontColorBtn.setChecked(!fontColorBtn.isChecked());
-                                }
-                            }
-                            if (sizeButton != null)
-                                sizeButton.setChecked(false);
+                    }
+                    if (fontColorsGroup != null || sizesLayout != null) {
+                        fontColorsGroup.setVisibility(GONE);
+                        sizesLayout.setVisibility(View.GONE);
+                        if(fontColorBtn!= null) {
+                            if(fontColorBtn.isChecked()) {
+                                handleCheckedFontColors(fontColorBtn);
+                                fontColorBtn.setChecked(!fontColorBtn.isChecked());
                             }
                         }
+                        if (sizeButton != null)
+                            sizeButton.setChecked(false);
+                    }
+                }
             });
         }
         if (fontColorBtn != null) {
@@ -1092,7 +1111,7 @@ public class CustomEditText extends EditText {
                         }
                         if (sizeButton != null)
                             sizeButton.setChecked(false);
-                        }
+                    }
                 }
             });
         }
@@ -1127,84 +1146,7 @@ public class CustomEditText extends EditText {
             });
         }
     }
-    private void handleCheckedFillColors(final ToolbarImageButton fillColorButton){
-        if(lastFillColorChecked == R.id.white_btn){
-            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
-                    R.drawable.ic_format_color_fill_gray50 : R.drawable.ic_fill_color_selected);
-        }else if(lastFillColorChecked == R.id.orange_btn){
-            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
-                    R.drawable.ic_format_color_fill_orange : R.drawable.ic_fill_color_selected_orange);
-        }else if(lastFillColorChecked == R.id.green_btn){
-            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
-                    R.drawable.ic_format_color_fill_green : R.drawable.ic_fill_color_selected_green);
-        }else if(lastFillColorChecked == R.id.light_blue_btn) {
-            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
-                    R.drawable.ic_format_color_fill_bluelight : R.drawable.ic_fill_color_selected_blue);
-        }else if(lastFillColorChecked== R.id.purple_btn){
-            fillColorButton.setBackgroundResource(fillColorButton.isChecked() ?
-                    R.drawable.ic_format_color_fill_purple : R.drawable.ic_fill_color_selected_purple);
-        }
-    }
-    public int setFontColorGroup(final RadioGroup radioGroup, final ToolbarImageButton fontColorButton){
-        groupColors=radioGroup;
-        groupColors.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                lastFontColorChecked=checkedId;
-                if(checkedId == R.id.black_btn){
-                    Log.i(TAG, "---CHECKED BLACK---");
-                    setFontColor(Color.BLACK, getSelectionStart(), getSelectionEnd());
-                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_black);
-                }else if(checkedId == R.id.red_btn){
-                    Log.i(TAG, "---CHECKED RED---");
-                    setFontColor(ContextCompat.getColor(getContext(), R.color.red_500), getSelectionStart(), getSelectionEnd());
-                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_red);
-                    lastFontColorChecked=checkedId;
-                }else if(checkedId == R.id.green_font_btn){
-                    Log.i(TAG, "---CHECKED GREEN---");
-                    setFontColor(ContextCompat.getColor(getContext(), R.color.green_500), getSelectionStart(), getSelectionEnd());
-                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_green);
-                    lastFontColorChecked=checkedId;
-                }else if(checkedId == R.id.blue_btn){
-                    Log.i(TAG, "---CHECKED BLUE---");
-                    setFontColor(ContextCompat.getColor(getContext(), R.color.blue_500), getSelectionStart(), getSelectionEnd());
-                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_blue);
-                    lastFontColorChecked=checkedId;
-                }else if(checkedId == R.id.grey_btn){
-                    Log.i(TAG, "---CHECKED GREY---");
-                    setFontColor(ContextCompat.getColor(getContext(), R.color.gray_500), getSelectionStart(), getSelectionEnd());
-                    fontColorButton.setBackgroundResource(R.drawable.ic_font_color_selected_grey);
-                    lastFontColorChecked=checkedId;
-                }
-            }
-        });
-        return lastFontColorChecked;
-    }
-    private void handleCheckedFontColors(final ToolbarImageButton fontColorButton){
-         if(lastFontColorChecked == R.id.black_btn){
-             fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
-                     R.drawable.ic_format_color_text_bl_black_24dp :
-                     R.drawable.ic_font_color_selected_black);
-         }else if(lastFontColorChecked == R.id.red_btn){
-             fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
-                     R.drawable.ic_format_color_text_red_24dp :
-                     R.drawable.ic_font_color_selected_red);
-         }else if(lastFontColorChecked == R.id.green_font_btn){
-             fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
-                     R.drawable.ic_format_color_text_green_24dp :
-                     R.drawable.ic_font_color_selected_green);
-         }else if(lastFontColorChecked == R.id.blue_btn) {
-             fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
-                     R.drawable.ic_format_color_text_blue_24dp :
-                     R.drawable.ic_font_color_selected_blue);
-         }else if(lastFontColorChecked== R.id.grey_btn){
-                    fontColorButton.setBackgroundResource(fontColorButton.isChecked() ?
-                            R.drawable.ic_format_color_text:
-                            R.drawable.ic_font_color_selected_grey);
-            }
 
-    }
     private void setFontColor(int color, int selectionStart, int selectionEnd) {
         currentColor = color;
         // Reverse if the case is what's noted above
@@ -1287,24 +1229,24 @@ public class CustomEditText extends EditText {
                     }
                     spannable.removeSpan(bgColorSpan);
                 }
-                    if (colorStart > -1) {
-                        spannable.setSpan(new BackgroundColorSpan(beforeColor), colorStart,
-                                selectionStart,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                    if (colorEnd > -1) {
-                        spannable.setSpan(new BackgroundColorSpan(afterColor), selectionEnd, colorEnd,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-
-                    spannable.setSpan(new BackgroundColorSpan(color), selectionStart, selectionEnd,
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                } else {
-                    spannable.setSpan(new BackgroundColorSpan(color), selectionStart, selectionEnd,
+                if (colorStart > -1) {
+                    spannable.setSpan(new BackgroundColorSpan(beforeColor), colorStart,
+                            selectionStart,
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
+                if (colorEnd > -1) {
+                    spannable.setSpan(new BackgroundColorSpan(afterColor), selectionEnd, colorEnd,
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+
+                spannable.setSpan(new BackgroundColorSpan(color), selectionStart, selectionEnd,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                spannable.setSpan(new BackgroundColorSpan(color), selectionStart, selectionEnd,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            this.setSelection(selectionStart, selectionEnd);
+        }
+        this.setSelection(selectionStart, selectionEnd);
     }
     private void removeBullet(Editable editable) {
         int lineCount = getLineCount();
@@ -1315,92 +1257,79 @@ public class CustomEditText extends EditText {
 
                 BulletSpan[] appliedStyles = editable.getSpans(startPos, endPos, BulletSpan.class);
                 if (appliedStyles.length > 0) {
-
-                    Log.i(TAG, "---THERE ARE BULLETS---");
                     BulletSpan colorSpan = appliedStyles[0];
                     String theLine = getText().toString().substring(startPos, endPos);
                     int lineTxt = getSelectionEnd() + 1 - theLine.length();
                     if (lineTxt == startPos) {
-                        Log.i(TAG, "---CURSOR IS AT THE END---REMOVING BULLET");
                         editable.removeSpan(colorSpan);
                         hasBullet=false;
-                        bulletedBtn.setChecked(false);
+                        bulletBtn.setChecked(false);
                     }
                     if (getLineCount() - 1 == i) {
                         lineTxt = getSelectionEnd() - theLine.length();
                         if (lineTxt == startPos) {
-                            Log.i(TAG, "---CURSOR IS AT THE END of LAST LINE---REMOVING BULLET");
                             editable.removeSpan(colorSpan);
                             hasBullet=false;
-                            bulletedBtn.setChecked(false);
+                            bulletBtn.setChecked(false);
 
                         }
                         if (getSelectionStart() == startPos + 1) {
-                            Log.i(TAG, "---CURSOR IS AT THE START of LAST LINE---REMOVING BULLET");
                             editable.removeSpan(colorSpan);
                             hasBullet=false;
-                            bulletedBtn.setChecked(false);
+                            bulletBtn.setChecked(false);
                         }
                     }
                     if (getSelectionStart() == startPos) {
-                        Log.i(TAG, "---CURSOR IS AT THE START---REMOVING BULLET");
                         editable.removeSpan(colorSpan);
                         hasBullet=false;
-                        bulletedBtn.setChecked(false);
+                        bulletBtn.setChecked(false);
                     }
 
                 }
             }
         }
     }
-        private void removeNumber (Editable editable) {
-            int lineCount = getLineCount();
-            if (lineCount >= 1) {
-                for (int i = 0; i < lineCount; i++) {
-                    int startPos = getLayout().getLineStart(i);
-                    int endPos = getLayout().getLineEnd(i);
-                    NumberSpan[] appliedNumber = editable.getSpans(startPos, endPos, NumberSpan.class);
-                    if (appliedNumber.length > 0) {
-                        Log.i(TAG, "---THERE ARE NUMBERS---");
-                        NumberSpan colorSpan = appliedNumber[0];
-                        String theLine = getText().toString().substring(startPos, endPos);
-                        int lineTxt = getSelectionEnd() + 1 - theLine.length();
-                        if (lineTxt == startPos) {
-                            Log.i(TAG, "---CURSOR IS AT THE END---REMOVING NUMBER");
-                            editable.removeSpan(colorSpan);
-                            numberedBtn.setChecked(false);
-                            hasNumber = false;
-
-                        }
-                        if (getLineCount() - 1 == i) {
-                            lineTxt = getSelectionEnd() - theLine.length();
-                            if (lineTxt == startPos) {
-                                Log.i(TAG, "---CURSOR IS AT THE END of LAST LINE---REMOVING NUMBER");
-                                editable.removeSpan(colorSpan);
-                                numberedBtn.setChecked(false);
-                                hasNumber = false;
-                                removedNumber = nr;
-                                Log.i(TAG, "---HAS NUMBER is  " + hasNumber);
-                                Log.i(TAG, "---NUMBER REMOVED IS " + removedNumber);
-                            }
-                            if (getSelectionStart() == startPos + 1) {
-                                Log.i(TAG, "---CURSOR IS AT THE START of LAST LINE---REMOVING NUMBER");
-                                editable.removeSpan(colorSpan);
-                                numberedBtn.setChecked(false);
-                                hasNumber = false;
-                            }
-                        }
-                        if (getSelectionStart() == startPos) {
-                            Log.i(TAG, "---CURSOR IS AT THE START---REMOVING NUMBER");
-                            editable.removeSpan(colorSpan);
-                            numberedBtn.setChecked(false);
-                            hasNumber = false;
-                        }
+    private void removeNumber (Editable editable) {
+        int lineCount = getLineCount();
+        if (lineCount >= 1) {
+            for (int i = 0; i < lineCount; i++) {
+                int startPos = getLayout().getLineStart(i);
+                int endPos = getLayout().getLineEnd(i);
+                NumberSpan[] appliedNumber = editable.getSpans(startPos, endPos, NumberSpan.class);
+                if (appliedNumber.length > 0) {
+                    NumberSpan colorSpan = appliedNumber[0];
+                    String theLine = getText().toString().substring(startPos, endPos);
+                    int lineTxt = getSelectionEnd() + 1 - theLine.length();
+                    if (lineTxt == startPos) {
+                        editable.removeSpan(colorSpan);
+                        numberBtn.setChecked(false);
+                        hasNumber = false;
 
                     }
+                    if (getLineCount() - 1 == i) {
+                        lineTxt = getSelectionEnd() - theLine.length();
+                        if (lineTxt == startPos) {
+                            editable.removeSpan(colorSpan);
+                            numberBtn.setChecked(false);
+                            hasNumber = false;
+                            removedNumber = nr;
+                        }
+                        if (getSelectionStart() == startPos + 1) {
+                            editable.removeSpan(colorSpan);
+                            numberBtn.setChecked(false);
+                            hasNumber = false;
+                        }
+                    }
+                    if (getSelectionStart() == startPos) {
+                        editable.removeSpan(colorSpan);
+                        numberBtn.setChecked(false);
+                        hasNumber = false;
+                    }
+
                 }
             }
         }
+    }
     public List<Paragraph> getParagraphs() {
         RTLayout layout = getRTLayout();
         return layout.getParagraphs();
@@ -1465,7 +1394,6 @@ public class CustomEditText extends EditText {
                     if (anAppliedParagraphStyle instanceof BulletSpan) {
                         if (currentBulletSpan == null) {
                             currentBulletSpan = (BulletSpan) anAppliedParagraphStyle;
-                            Log.i(TAG, "--Current bullet NULL");
                         }
                     }else if(anAppliedParagraphStyle instanceof NumberSpan){
                         if (currentNumberSpan == null) {
@@ -1478,14 +1406,10 @@ public class CustomEditText extends EditText {
                 for (CharacterStyle appliedStyle : appliedStyles) {
                     if (appliedStyle instanceof BoldSpan) {
                         // Bold style found
-                        Log.i(TAG, "---FOUNDED BOLD in afterTextChanged---");
                         currentBoldSpan = (BoldSpan) appliedStyle;
-
                     } else if ((appliedStyle) instanceof ItalicSpan) {
                         // Italic style found
-                        Log.i(TAG, "---FOUNDED ITALIC in afterTextChanged---");
                         currentItalicSpan = (ItalicSpan) appliedStyle;
-
                     } else if (appliedStyle instanceof UnderlineSpan) {
                         // Underlined style found
                         currentAgsUnderlineSpan = (UnderlineSpan) appliedStyle;
@@ -1516,22 +1440,19 @@ public class CustomEditText extends EditText {
         }
         private void handleInsertBullet(Editable editable, int position, BulletSpan currentBulletSpan) {
             int linecount = getLineCount();
-            if (bulletedBtn != null && bulletedBtn.isChecked()
+            if (bulletBtn != null && bulletBtn.isChecked()
                     && currentBulletSpan == null) {
                 if (linecount >= 0) {
                     for (int i = 0; i < linecount; i++) {
                         int startPos = getLayout().getLineStart(i);
                         int endPos = getLayout().getLineEnd(i);
-                        Log.i(TAG, " Position start " + startPos + " Position end " + endPos);
                         BulletSpan[] bulletExists = editable.getSpans(startPos, endPos, BulletSpan.class);
                         if (bulletExists.length == 0 && hasBullet) {
                             currentBulletSpan = new BulletSpan(margin, true, true, true);
                             editable.setSpan(currentBulletSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             hasBullet=false;
-                            Log.i(TAG, "---ADDING BULLET in AFTERTEXTCHANGED---");
                         } else {
                             editable.removeSpan(currentBulletSpan);
-                            Log.i(TAG, "---REMOVING BULLET in AFTERTEXTCHANGED---");
                             hasBullet=true;
 
                         }
@@ -1542,7 +1463,7 @@ public class CustomEditText extends EditText {
         private void handleInsertNumber(Editable editable, int position, NumberSpan currentNumberSpan) {
             boolean previousNumber = true;
             int lineCount = getLineCount();
-            if (numberedBtn != null && numberedBtn.isChecked()
+            if (numberBtn != null && numberBtn.isChecked()
                     && currentNumberSpan == null) {
                 int nr = 0;
                 if (lineCount >= 0) {
@@ -1572,47 +1493,42 @@ public class CustomEditText extends EditText {
                         if(!hasNumber){
                             nr=1;
                         }
-                        Log.i(TAG, "LINE-- " + i + " HAS NUMBER-- " + hasNumber + " NUMBER is " + nr);
                         if (numberExists.length == 0 && hasNumber) {
                             currentNumberSpan = new NumberSpan(nr, margin, true, true, true);
                             editable.setSpan(currentNumberSpan, startPos, endPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             hasNumber = false;
-                            Log.i(TAG, "--ADDING NUMBER--" + nr);
                         } else {
                             editable.removeSpan(currentNumberSpan);
                             hasNumber = true;
-                            Log.i(TAG, "---REMOVING NUMBER--");
                         }
                     }
                 }
             }else{
                 resetNumber=true;
             }
-            }
+        }
         private void handleInsertSize(Editable editable, int position, AbsoluteSizeSpan currentAbsoluteSizeSpan) {
 
             //Log.i(TAG, "---POSITION--- "+position);
             //Log.i(TAG, "---LENGTH--- "+length());
             /**
-            int textSize = Math.round(getTextSize());
-            i = Helper.convertPxToSp(textSize);
-            currentSize = i;
-            for (int p : values) {
-                if (seekBarSizes.getProgress() >= p) {
-                    do {
-                        editable.setSpan(new AbsoluteSizeSpan(currentSize = currentSize + 2), position - appendTextLength, position,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }while (currentSize==i+i);
-                }
-            }
+             int textSize = Math.round(getTextSize());
+             i = Helper.convertPxToSp(textSize);
+             currentSize = i;
+             for (int p : values) {
+             if (seekBarSizes.getProgress() >= p) {
+             do {
+             editable.setSpan(new AbsoluteSizeSpan(currentSize = currentSize + 2), position - appendTextLength, position,
+             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+             }while (currentSize==i+i);
+             }
+             }
              */
-             //Fix for exception in setSpan() starts before 0---
-                      if(position==1 && length()==1) {
-                Log.i(TAG, "FIX");
+            //Fix for exception in setSpan() starts before 0---
+            if(position==1 && length()==1) {
                 appendTextLength=1;
             }
-            Log.i(TAG, "CURRENT SIZE " +currentSize);
-           // Log.i(TAG, "currentAbsoluteSizeSpan " +currentAbsoluteSizeSpan.getSize());
+            // Log.i(TAG, "currentAbsoluteSizeSpan " +currentAbsoluteSizeSpan.getSize());
 
             if (currentAbsoluteSizeSpan != null) {
                 if (currentAbsoluteSizeSpan.getSize() != currentSize) {
@@ -1620,20 +1536,16 @@ public class CustomEditText extends EditText {
                     int sizeStart = editable.getSpanStart(currentAbsoluteSizeSpan);
                     int sizeEnd = editable.getSpanEnd(currentAbsoluteSizeSpan);
 
-                    Log.i(TAG, "SIZE START " +sizeStart);
-                    Log.i(TAG, "SIZE END " +sizeEnd);
                     if (position == sizeEnd) {
                         AbsoluteSizeSpan nextSpan = getNextAbsoluteSizeSpan(editable, position);
 
                         if (nextSpan != null) {
-                            Log.i(TAG, "NEXT SPAN " +nextSpan.getSize());
 
                             if (currentSize == nextSpan.getSize()) {
                                 int colorEndNextSpan = editable.getSpanEnd(nextSpan);
                                 editable.removeSpan(currentAbsoluteSizeSpan);
                                 editable.removeSpan(nextSpan);
 
-                                Log.i(TAG, "currentAbsoluteSizeSpan " +currentAbsoluteSizeSpan.getSize());
                                 // set before span
                                 editable.setSpan(new AbsoluteSizeSpan(currentAbsoluteSizeSpan.getSize()),sizeStart,
                                         sizeEnd - appendTextLength,
@@ -1680,7 +1592,6 @@ public class CustomEditText extends EditText {
                 AbsoluteSizeSpan nextSpan = getNextAbsoluteSizeSpan(editable, position);
                 if (nextSpan != null) {
                     int sizeEndNextSpan = editable.getSpanEnd(nextSpan);
-                    Log.i(TAG, "NEXT SPAN " +nextSpan.getSize());
                     if (currentSize == nextSpan.getSize()) {
                         editable.removeSpan(nextSpan);
                         // set before span
@@ -1816,8 +1727,6 @@ public class CustomEditText extends EditText {
                         if (nextSpan != null) {
                             if (currentBGColor == nextSpan.getBackgroundColor()) {
 
-                                Log.i(TAG, "NEXT SPAN IS NOT NULL");
-
                                 int colorEndNextSpan = editable.getSpanEnd(nextSpan);
                                 editable.removeSpan(currentBackGroundColorSpan);
                                 editable.removeSpan(nextSpan);
@@ -1835,7 +1744,6 @@ public class CustomEditText extends EditText {
                         }
 
                     }
-                    Log.i(TAG, "REMOVING");
                     editable.removeSpan(currentBackGroundColorSpan);
                     if (position - appendTextLength < colorEnd && colorStart != colorEnd) {
                         // Cursor in the text's middle with different color
@@ -1846,14 +1754,12 @@ public class CustomEditText extends EditText {
                             editable.setSpan(new BackgroundColorSpan(oldColor), colorStart,
                                     position - appendTextLength,
                                     Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                            Log.i(TAG, "INSERTING");
                         }
 
                         // At inserting
                         editable.setSpan(new BackgroundColorSpan(currentBGColor), position - appendTextLength,
                                 position,
                                 Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                        Log.i(TAG, "INSERTING AT START");
 
                         if (position < colorEnd) {
                             // After inserting
@@ -1866,7 +1772,6 @@ public class CustomEditText extends EditText {
                         editable.setSpan(new BackgroundColorSpan(currentBGColor), position - appendTextLength,
                                 colorEnd,
                                 Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                        Log.i(TAG, "INSERTING AT THE END");
                     }
                 }
             }
@@ -1883,15 +1788,12 @@ public class CustomEditText extends EditText {
                                 position - appendTextLength,
                                 colorEndNextSpan,
                                 Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                        Log.i(TAG, "--INSERTING-- current color != -1");
-
                         return;
                     }
                 }
                 editable.setSpan(new BackgroundColorSpan(currentBGColor),
                         position - appendTextLength, position,
                         Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
-                Log.i(TAG, "--INSERTING-- current color == -1");
             }
         }
 
@@ -1936,13 +1838,11 @@ public class CustomEditText extends EditText {
                 editable.setSpan(new ItalicSpan(), position - appendTextLength,
                         position,
                         Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                Log.i(TAG, "---ADDING ITALIc in atc");
             } else if (italicBtn != null && !italicBtn.isChecked()
                     && currentItalicSpan != null) {
                 int italicStart = editable.getSpanStart(currentItalicSpan);
                 int italicEnd = editable.getSpanEnd(currentItalicSpan);
 
-                Log.i(TAG, "---REMOVING ITALIc in atc");
                 editable.removeSpan(currentItalicSpan);
                 if (italicStart <= (position - appendTextLength)) {
                     editable.setSpan(new ItalicSpan(),
@@ -1952,7 +1852,6 @@ public class CustomEditText extends EditText {
 
                 // Split the span
                 if (italicEnd > position) {
-                    Log.i(TAG, "---ADDING ITALIc in atc");
                     editable.setSpan(new ItalicSpan(), position,
                             italicEnd,
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1971,7 +1870,6 @@ public class CustomEditText extends EditText {
                     // span is inclusive,
                     // so any new characters entered right after this one
                     // will automatically get this style.
-                    Log.i(TAG, "---ADDING BOLD in atc");
                     editable.setSpan(new BoldSpan(),
                             position - appendTextLength, position,
                             Spannable.SPAN_INCLUSIVE_INCLUSIVE);
@@ -1983,7 +1881,6 @@ public class CustomEditText extends EditText {
                     // before the newly entered character.
                     int boldStart = editable.getSpanStart(currentBoldSpan);
                     int boldEnd = editable.getSpanEnd(currentBoldSpan);
-                    Log.i(TAG, "---REMOVING BOLD in atc");
                     editable.removeSpan(currentBoldSpan);
                     if (boldStart <= (position - appendTextLength)) {
                         editable.setSpan(new BoldSpan(),
@@ -1998,7 +1895,6 @@ public class CustomEditText extends EditText {
                     // ends at the old span's ending position. So we split
                     // the span.
                     if (boldEnd > position) {
-                        Log.i(TAG, "---ADDING BOLD in atcc ");
                         editable.setSpan(new BoldSpan(),
                                 position, boldEnd,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -2075,7 +1971,6 @@ public class CustomEditText extends EditText {
             }
         }
         private void removeSizeSpan(int position, Editable editable) {
-
             /**
              AbsoluteSizeSpan[] appliedSizes = editable.getSpans(position - 1, position, AbsoluteSizeSpan.class);
              if (appliedSizes.length > 0) {
@@ -2083,7 +1978,6 @@ public class CustomEditText extends EditText {
              editable.removeSpan(sizeSpan);
              }
              */
-
             AbsoluteSizeSpan[] appliedStyles = editable.getSpans(position - 1, position, AbsoluteSizeSpan.class);
             AbsoluteSizeSpan currentAbsoluteSizeSpan = null;
             for (AbsoluteSizeSpan appliedStyle : appliedStyles) {
@@ -2093,7 +1987,6 @@ public class CustomEditText extends EditText {
                     }
                 }
             }
-
             if (appliedStyles.length > 0 ) {
                 AbsoluteSizeSpan colorSpan = appliedStyles[0];
                 int underLineStart = editable.getSpanStart(colorSpan);
@@ -2148,16 +2041,13 @@ public class CustomEditText extends EditText {
             if (styleSpan != null && previousColorSpan == null) {
                 int styleStart = editable.getSpanStart(styleSpan);
                 int styleEnd = editable.getSpanEnd(styleSpan);
-                Log.i(TAG, "---REMOVING STYLESPAN in btc ");
                 editable.removeSpan(styleSpan);
                 if (styleStart < (position - 1)) {
-                    Log.i(TAG, "---Adding STYLESPAN in btc ");
                     editable.setSpan(object, styleStart, position - 1,
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
                 // We need to split the span
                 if (styleEnd > position) {
-                    Log.i(TAG, "---Adding STYLESPAN in btc ");
                     editable.setSpan(object, position, styleEnd,
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }

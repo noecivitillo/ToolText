@@ -88,7 +88,6 @@ import java.util.regex.Pattern;
 
 public class HtmlHandler {
 
-
     private static final String TAG = "HTML Handler";
 
     private static final String BR = "<br/>\n";
@@ -101,10 +100,6 @@ public class HtmlHandler {
     private static Spanned mText;
     private static Stack<AccumulatedParagraphStyle> mParagraphStyles = new Stack<>();
     private static RTFormat mRTFormat;
-   // private static List<RTImage> mImages;
-    String width;
-    String height;
-
 
 
     private static class HtmlParser {
@@ -740,7 +735,7 @@ public class HtmlHandler {
             }
         }
         private void startAHref(Attributes attributes) {
-            Log.i(TAG, "STARTING HREF");
+           // Log.i(TAG, "STARTING HREF");
             String href = attributes.getValue("", "href");
             int len = mResult.length();
             mResult.setSpan(new Href(href), len, len, Spanned.SPAN_MARK_MARK);
@@ -756,7 +751,6 @@ public class HtmlHandler {
             if (where != len) {
                 Href h = (Href) obj;
                 if (h.mHref != null) {
-                    Log.i(TAG, "ENDING HREF");
                     mResult.setSpan(new URLSpan(h.mHref), where, len, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     //mResult.setSpan(new URLSpan(h.mHref), where, len, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
@@ -899,8 +893,6 @@ public class HtmlHandler {
                     Object span = list instanceof UL ?
                             new BulletSpan(margin, start == end, false, false)://todo see
                             new NumberSpan(nr, margin, start == end, false, false);//NUMBER SPAN
-
-                            Log.i(TAG , "Add NumberSpan ");
                     mResult.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
 
@@ -989,7 +981,6 @@ public class HtmlHandler {
         private static final Pattern FONT_SIZE = Pattern.compile("\\d+");
         private static final Pattern FONT_COLOR = Pattern.compile("#[a-f0-9]+");
 
-        //TODO
         private static void startImg(SpannableStringBuilder text,
                                      Attributes attributes, Html.ImageGetter img) {
             String src = attributes.getValue("", "src");
@@ -999,15 +990,15 @@ public class HtmlHandler {
 
             if (img != null) {
                 //Log.i(TAG, "IMAGE IS != NULL--- SET DRAWABLE WIDTH : " + d.getIntrinsicWidth() + " HEIGHT " +d.getIntrinsicHeight());
-                Log.i(TAG, "IMAGE IS != NULL--- SRC: " + src);
+                //Log.i(TAG, "IMAGE IS != NULL--- SRC: " + src);
                 d = img.getDrawable(src);
                 d.setBounds(0, 0, Integer.parseInt(width), Integer.parseInt(height));
-                Log.i(TAG, "WIDTH " + width);
-                Log.i(TAG, "HEIGHT " + height);
+                //Log.i(TAG, "WIDTH " + width);
+                //Log.i(TAG, "HEIGHT " + height);
             }
 
             if (d == null) {
-                Log.i(TAG, "IMAGE IS == NULL");
+                //Log.i(TAG, "IMAGE IS == NULL");
                 //If image is null, place R.drawable.unknown_image and set new bounds
                 /*
                 d = ContextCompat.getDrawable(//context//, R.drawable.unknown_image);
@@ -1015,8 +1006,6 @@ public class HtmlHandler {
                 d.setBounds(0, 0, 50, 50);
                 */
                       }
-
-
             int len = text.length();
             text.append("\uFFFC");
 
