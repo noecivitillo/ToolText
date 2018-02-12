@@ -4,9 +4,9 @@
 __**A nice and simple toolbar for rich text edit in Android**__
 
 
-![Alt text](ToolText/toolbar/src/main/res/drawable/device20180209200500.png)
-![Alt text](ToolText/toolbar/src/main/res/drawable/device20180209200825.png)
-![Alt text](ToolText/toolbar/src/main/res/drawable/device20180209201154.png)
+![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200500.png)
+![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200825.png)
+![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209201154.png)	
 
 
 ### Features
@@ -96,11 +96,7 @@ To **set Html**:
 See source code for more features
 
 
-### Libraries [consulted](https://github.com/1gravity/Android-RTEditor, 
-https://github.com/wasabeef/richeditor-android, 
-https://github.com/commonsguy/cwac-richedit, 
-https://github.com/windyzboy/CustomEditor,
-https://github.com/trietphm/CustomEditor)
+### Libraries [consulted] (https://github.com/1gravity/Android-RTEditor, https://github.com/wasabeef/richeditor-android, https://github.com/commonsguy/cwac-richedit, https://github.com/windyzboy/CustomEditor, https://github.com/trietphm/CustomEditor)
                           
 
 
