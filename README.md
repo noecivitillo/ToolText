@@ -1,15 +1,15 @@
-##ToolText Android
+## ToolText Android
 
 
 __**A nice and simple toolbar for rich text edit in Android**__
 
 
-![picture](\.toolbar\src\main\res\drawable\device20180209200500.png)
-![picture](\.toolbar\src\main\res\drawable\device20180209200825.png)
-![picture](\.toolbar\src\main\res\drawable\device20180209201154.png)
+![Alt text](ToolText/toolbar/src/main/res/drawable/device20180209200500.png)
+![Alt text](ToolText/toolbar/src/main/res/drawable/device20180209200825.png)
+![Alt text](ToolText/toolbar/src/main/res/drawable/device20180209201154.png)
 
 
-###Features
+### Features
 
 **Bold**
 
@@ -27,9 +27,9 @@ Bullets
 
 Numbers
 
-###Setup
+### Setup
 
-1-In your root **build.gradle**
+1- In your root **build.gradle**
 
         allprojects {
 
@@ -39,13 +39,13 @@ Numbers
         		          }
        }
         	 
-2-Add the dependencies
+2- Add the dependencies
              
       dependencies {
          	        compile 'com.github.noecivitillo:ToolText:v1.1.1'
        }
 
-###Usage
+### Usage
 
 Check the Demo App for usage, or download it
 
@@ -59,7 +59,7 @@ Check the Demo App for usage, or download it
 
             <style name="ThemeLight" parent="@style/ToolbarBaseTheme"/>
 
-3-In your layout set CustomEditText and include toolbar
+3- In your layout set CustomEditText and include toolbar
 
               <com.tool.CustomEditText
                android:id="@+id/customEditText"
@@ -69,18 +69,18 @@ Check the Demo App for usage, or download it
 
               <include layout="@layout/toolbar_edittext"/>
 
-4-In your activity:
+4- In your activity:
 
-a)Find toolbar layout and CustomEditText
+a) Find toolbar layout and CustomEditText
 
              LinearLayout toolbarLayout = findViewById(R.id.toolbar_layout);
              CustomEditText customEditText = findViewById(R.id.customEditText);
 
-b)Set all styles:
+b) Set all styles:
 
             customEditText.setAllStyles(toolbarLayout);
 
-c) or set styles independently:
+c) Or set styles independently:
 (don't forget to find the view)
 
             customEditText.setBoldButton(boldBtn);
@@ -96,19 +96,15 @@ To **set Html**:
 See source code for more features
 
 
-###Libraries [consulted] 
-(https://github.com/1gravity/Android-RTEditor, 
+### Libraries [consulted] (https://github.com/1gravity/Android-RTEditor, 
 https://github.com/wasabeef/richeditor-android, 
 https://github.com/commonsguy/cwac-richedit, 
 https://github.com/windyzboy/CustomEditor,
 https://github.com/trietphm/CustomEditor)
                           
-                          )
 
 
-
-
-###License
+### License
 
 MIT License
 
