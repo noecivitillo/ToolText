@@ -1,1 +1,1 @@
-include ':toolbar'
+include ':toolbar', ':toolTextDemo'
