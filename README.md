@@ -96,7 +96,7 @@ To **set Html**:
 See source code for more features
 
 
-### Libraries [consulted] (https://github.com/1gravity/Android-RTEditor, 
+### Libraries [consulted](https://github.com/1gravity/Android-RTEditor, 
 https://github.com/wasabeef/richeditor-android, 
 https://github.com/commonsguy/cwac-richedit, 
 https://github.com/windyzboy/CustomEditor,
