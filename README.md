@@ -1,12 +1,15 @@
 # ToolText Android
 
+[![Release](https://jitpack.io/v/noecivitillo/ToolText.svg)]
+(https://jitpack.io/#noecivitillo/ToolText)
+
 
 __**A nice and simple toolbar for rich text edit in Android**__
 
 
 ![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200500.png)
 ![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200825.png)
-![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209201154.png)	
+![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180213111200.png)	
 
 
 ### Features

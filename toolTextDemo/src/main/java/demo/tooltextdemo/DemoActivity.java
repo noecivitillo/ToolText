@@ -2,21 +2,17 @@ package demo.tooltextdemo;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.TextView;
-
 import com.tool.CustomEditText;
-import com.tool.ToolbarImageButton;
-import com.tool.ToolbarParams;
 
-import toolbar.tooltextdemo.R;
+
+
 
 
 public class DemoActivity extends AppCompatActivity {
@@ -73,6 +69,7 @@ public class DemoActivity extends AppCompatActivity {
             String textHtml = customEditText.getTextHTML();
             textView.setText(textHtml);
             textView.setVisibility(View.VISIBLE);
+            textView.setMovementMethod(new ScrollingMovementMethod());
         }else{
             textView.setVisibility(View.GONE);
         }
