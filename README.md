@@ -52,7 +52,7 @@ Numbers
 
 ### Usage
 
-Check the Demo App for usage, or download it
+Check the Demo App for usage, or [download it](https://play.google.com/store/apps/details?id=toolbar.tooltextdemo&hl=en)
 
 1- Init ToolText in your Application class:
 
