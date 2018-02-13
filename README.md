@@ -1,7 +1,6 @@
 # ToolText Android
 
-[![Release](https://jitpack.io/v/noecivitillo/ToolText.svg)]
-(https://jitpack.io/#noecivitillo/ToolText)
+[![Release](https://jitpack.io/v/noecivitillo/ToolText.svg)](https://jitpack.io/#noecivitillo/ToolText)
 
 
 __**A nice and simple toolbar for rich text edit in Android**__
