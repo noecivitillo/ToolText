@@ -7,10 +7,7 @@
 
 __**A nice and simple toolbar for rich text edit in Android**__
 
-
-![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200500.png)
-![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200825.png)
-![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180213111200.png)	
+![Alt text](https://imgur.com/gy59AMO.gif)
 
 
 ### Features
