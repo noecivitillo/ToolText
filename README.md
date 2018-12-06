@@ -8,7 +8,6 @@
 __**A nice and simple toolbar for rich text edit in Android**__
 
 
-![Alt text](https://content.screencast.com/users/ereichel/folders/Snagit/media/bef991f6-f251-46de-ab2f-d188cfa97917/2018-12-06_17-09-38.gif)
 ![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200500.png)
 ![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180209200825.png)
 ![Alt text](https://raw.github.com/noecivitillo/ToolText/master/toolbar/src/main/res/drawable/device20180213111200.png)	
