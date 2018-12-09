@@ -7,7 +7,7 @@
 
 __**A nice and simple toolbar for rich text edit in Android**__
 
-![Alt text](https://imgur.com/gy59AMO.gif)
+![Alt text](https://imgur.com/zY3PiXU.gif)
 
 
 ### Features
